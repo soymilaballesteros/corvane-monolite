@@ -14,8 +14,18 @@
 
   --gutter: clamp(1.25rem, 4vw, 3.5rem);
   --spine-x: clamp(1.25rem, 3.2vw, 3rem);
+  /* Sangría izquierda del contenido: deja sitio a la espina. Una sola fuente
+     de verdad, porque se usa en la barra, las secciones y los overlays. */
+  --content-inset: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
   --content-max: 78rem;
 
   --pad-section: clamp(5.5rem, 13vh, 11rem);
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Sin espina visible no hay nada que esquivar: márgenes simétricos.
+   Con la sangría puesta, el contenido quedaba a 92px por la izquierda y a
+   20px por la derecha en un móvil. */
+@media (max-width: 700px) {
+  :root { --content-inset: var(--gutter); }
 }

@@ -32,7 +32,7 @@
 .seq__ui {
   position: absolute;
   z-index: 2;
-  left: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
+  left: var(--content-inset);
   bottom: clamp(3rem, 9vh, 6rem);
   right: var(--gutter);
   display: grid;

@@ -43,7 +43,7 @@
 .hero__copy {
   position: absolute;
   z-index: 2;
-  left: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
+  left: var(--content-inset);
   right: var(--gutter);
   top: 50%;
   transform: translateY(-50%);
@@ -92,10 +92,6 @@
   }
 }
 
-/* Sin espina visible no hay razón para sangrar el texto. */
-@media (max-width: 700px) {
-  .hero__copy { left: var(--gutter); }
-}
 
 /* ── 2 · MANIFIESTO ─────────────────────────────────────────── */
 .manifesto { display: grid; gap: 2.5rem; max-width: 60rem; }
