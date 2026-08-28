@@ -384,14 +384,9 @@ export class ScrollSequence {
   private goStatic(): void {
     this.isStatic = true
     this.section.classList.add('is-static')
-    if (this.still) {
-      // La imagen de respaldo se pide solo aquí. Con `src` en el HTML el
-      // navegador la descarga aunque esté oculta, y son ~20 KB que casi nunca
-      // se ven: solo con reduce-motion o si fallan los fotogramas.
-      const src = this.still.dataset.src
-      if (src && !this.still.src) this.still.src = src
-      this.still.hidden = false
-    }
+    // La imagen de respaldo la muestra el CSS con la clase `is-static`;
+    // hasta entonces está en display:none y ni siquiera se descarga.
+    if (this.still) this.still.hidden = false
     this.trigger?.kill()
     this.trigger = undefined
   }

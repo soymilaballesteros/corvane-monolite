@@ -17,6 +17,16 @@
 }
 .seq__still { object-fit: cover; }
 
+/*
+ * La imagen de respaldo se oculta por CSS, no con el atributo `hidden`:
+ * `img { display: block }` de la hoja base le gana al display:none que el
+ * navegador aplica a [hidden], y la imagen se colaba pintando su texto
+ * alternativo. Con `loading="lazy"` y display:none tampoco se descarga.
+ * Sin JS no hay lienzo que pinte, así que ahí sí se muestra.
+ */
+[data-js] .seq__still { display: none; }
+[data-js] .seq.is-static .seq__still { display: block; }
+
 /* Viñeteado: hunde los bordes para que el texto del overlay se lea
    sin necesidad de una caja opaca encima del producto. */
 .seq__pin::after {
