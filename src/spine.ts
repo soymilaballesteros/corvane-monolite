@@ -8,7 +8,6 @@
  */
 const SECTION_NAMES: Array<[string, string]> = [
   ['manifiesto', 'Manifiesto'],
-  ['pieza', 'La pieza'],
   ['atelier', 'Atelier'],
   ['anatomia', 'Anatomía'],
   ['ficha', 'Ficha técnica'],

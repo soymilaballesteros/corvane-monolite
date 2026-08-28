@@ -56,7 +56,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ── Contenedor ─────────────────────────────────────────────── */
-.hero, .manifesto, .atelier, .spec, .heritage, .collection, .request, .footer {
+/* El hero queda fuera: ahora es un escenario a sangre y su texto se posiciona
+   por su cuenta dentro del pin. Con este relleno el lienzo no llegaba al borde. */
+.manifesto, .atelier, .spec, .heritage, .collection, .request, .footer {
   padding-inline: var(--gutter);
   padding-left: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
 }

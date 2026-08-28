@@ -14,6 +14,7 @@ import { initSpine } from './spine'
 import { initNav } from './nav'
 
 const sequences: ScrollSequence[] = []
+const landscape = window.matchMedia('(min-aspect-ratio: 1/1)')
 
 /** Enciende el hito del despiece que corresponde al progreso. */
 function bindBeats(section: HTMLElement): (p: number) => void {
@@ -33,11 +34,25 @@ function initSequences(): void {
   for (const section of sections) {
     const name = section.dataset.seq!
     const lengthVh = Number(section.dataset.length) || 300
+    const beats = bindBeats(section)
+    const isHero = section.classList.contains('hero')
     const seq = new ScrollSequence({
       section,
       name,
       lengthVh,
-      onProgress: bindBeats(section),
+      eager: isHero,
+      onProgress: (p) => {
+        beats(p)
+        // En apaisado el texto se retira entre el 15% y el 45% del giro y deja
+        // la pieza sola. En vertical NO: ahí el texto va debajo del producto,
+        // no lo tapa, y sin él media pantalla se queda vacía.
+        if (isHero) {
+          const fade = landscape.matches
+            ? 1 - Math.min(1, Math.max(0, (p - 0.15) / 0.3))
+            : 1
+          section.style.setProperty('--hero-copy', fade.toFixed(3))
+        }
+      },
     })
     seq.init()
     sequences.push(seq)

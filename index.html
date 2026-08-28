@@ -8,8 +8,9 @@
 <meta name="theme-color" content="#0B0B0C" />
 <script>document.documentElement.dataset.js="1"</script>
 <link rel="preload" as="image" href="/img/hero-poster.webp"
-      imagesrcset="/img/hero-poster-720.webp 720w, /img/hero-poster.webp 1200w"
-      imagesizes="(max-width: 860px) 92vw, 48vw" fetchpriority="high" />
+      media="(min-width: 701px)" fetchpriority="high" />
+<link rel="preload" as="image" href="/img/hero-poster-mobile.webp"
+      media="(max-width: 700px)" fetchpriority="high" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230B0B0C'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23C6A664' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
@@ -32,29 +33,39 @@
 
 <main id="top">
 
-  <!-- 1 ── HERO -->
-  <section class="hero">
-    <div class="hero__text">
-      <p class="eyebrow">Florencia · desde 1911</p>
-      <h1 class="hero__title">Una sola pieza<br />de piel.</h1>
-      <p class="lede">
-        El upper del <em>Monolite</em> se corta de una única pieza de becerro.
-        Sin costuras que lo dividan. Sin logotipo que lo explique.
-      </p>
-      <div class="hero__meta">
-        <span>Edición de 120 pares</span>
-        <span class="dot"></span>
-        <span>Horma CV-11</span>
+  <!-- 1 ── HERO · la rotación 360° es el fondo, enganchada al scroll -->
+  <section class="hero seq" id="hero" data-seq="rotate" data-length="260">
+    <div class="seq__pin hero__stage">
+      <!-- El póster es el elemento LCP: se pinta sin esperar al JavaScript.
+           Lleva el MISMO encuadre que los fotogramas de cada juego, y el JS lo
+           redibuja en el lienzo con su misma fórmula, así que el relevo no se
+           nota. Si los fotogramas no llegaran a cargar, esto es lo que queda. -->
+      <picture class="hero__poster">
+        <source media="(max-width: 700px)" srcset="/img/hero-poster-mobile.webp" width="720" height="540" />
+        <img src="/img/hero-poster.webp"
+             alt="El Corvane Monolite de tres cuartos, sobre fondo de estudio gris carbón."
+             width="1440" height="810" fetchpriority="high" decoding="async" />
+      </picture>
+      <canvas class="seq__canvas" aria-hidden="true"></canvas>
+
+      <div class="hero__copy">
+        <p class="eyebrow">Florencia · desde 1911</p>
+        <h1 class="hero__title">Una sola pieza<br />de piel.</h1>
+        <p class="lede">
+          El upper del <em>Monolite</em> se corta de una única pieza de becerro.
+          Sin costuras que lo dividan. Sin logotipo que lo explique.
+        </p>
+        <div class="hero__meta">
+          <span>Monolite</span>
+          <span class="dot"></span>
+          <span>Horma CV-11</span>
+          <span class="dot"></span>
+          <span>Edición de 120 pares</span>
+        </div>
       </div>
+
+      <p class="seq__hint">Desplázate para girarla</p>
     </div>
-    <figure class="hero__vitrine">
-      <img src="/img/hero-poster.webp"
-           srcset="/img/hero-poster-720.webp 720w, /img/hero-poster.webp 1200w"
-           sizes="(max-width: 860px) 92vw, 48vw"
-           alt="El Corvane Monolite de tres cuartos, sobre fondo de estudio gris carbón."
-           width="1200" height="960" fetchpriority="high" decoding="async" />
-      <figcaption>Monolite · Naturale</figcaption>
-    </figure>
   </section>
 
   <!-- 2 ── MANIFIESTO -->
@@ -70,24 +81,7 @@
     </p>
   </section>
 
-  <!-- 3 ── LA PIEZA · secuencia rotación -->
-  <section class="seq" id="pieza" data-seq="rotate" data-length="300">
-    <div class="seq__pin">
-      <canvas class="seq__canvas" aria-hidden="true"></canvas>
-      <img class="seq__still" data-src="/img/fallback-rotate.webp" alt="El Corvane Monolite girando sobre su eje." width="1440" height="810" loading="lazy" decoding="async" hidden />
-      <div class="seq__ui">
-        <p class="eyebrow">La pieza</p>
-        <h2 class="seq__title">Monolite</h2>
-        <dl class="seq__facts">
-          <div><dt>Horma</dt><dd>CV-11</dd></div>
-          <div><dt>Edición</dt><dd>120 pares</dd></div>
-        </dl>
-      </div>
-      <p class="seq__hint">Desplázate para girarla</p>
-    </div>
-  </section>
-
-  <!-- 4 ── ATELIER -->
+  <!-- 3 ── ATELIER -->
   <section class="atelier" id="atelier">
     <h2 class="section-title reveal">El atelier</h2>
     <div class="crafts">
@@ -109,7 +103,7 @@
     </div>
   </section>
 
-  <!-- 5 ── ANATOMÍA · secuencia despiece -->
+  <!-- 4 ── ANATOMÍA · secuencia despiece -->
   <section class="seq" id="anatomia" data-seq="explode" data-length="400">
     <div class="seq__pin">
       <canvas class="seq__canvas" aria-hidden="true"></canvas>
@@ -126,7 +120,7 @@
     </div>
   </section>
 
-  <!-- 6 ── FICHA TÉCNICA -->
+  <!-- 5 ── FICHA TÉCNICA -->
   <section class="spec" id="ficha">
     <h2 class="section-title reveal">Ficha técnica</h2>
     <dl class="spec__list">
@@ -142,7 +136,7 @@
     </dl>
   </section>
 
-  <!-- 7 ── HERITAGE -->
+  <!-- 6 ── HERITAGE -->
   <section class="heritage" id="heritage">
     <h2 class="section-title reveal">Ciento quince años</h2>
     <ol class="timeline">
@@ -154,7 +148,7 @@
     </ol>
   </section>
 
-  <!-- 8 ── COLECCIÓN -->
+  <!-- 7 ── COLECCIÓN -->
   <section class="collection" id="coleccion">
     <h2 class="section-title reveal">La colección</h2>
     <div class="editions">
@@ -179,7 +173,7 @@
     </div>
   </section>
 
-  <!-- 9 ── EDICIÓN LIMITADA + CITA -->
+  <!-- 8 ── EDICIÓN LIMITADA + CITA -->
   <section class="request" id="cita">
     <div class="request__num reveal">
       <span class="request__n">001</span><span class="request__d">/120</span>

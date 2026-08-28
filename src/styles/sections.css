@@ -1,53 +1,100 @@
 /* ── 1 · HERO ────────────────────────────────────────────────
-   Asimétrico: el texto a la izquierda, el producto en una vitrina
-   vertical a la derecha. No un hero centrado.                 */
-.hero {
-  min-height: 100svh;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  align-items: center;
-  gap: clamp(2rem, 6vw, 5rem);
-  padding-block: clamp(8rem, 18vh, 12rem) clamp(4rem, 8vh, 7rem);
-  max-width: calc(var(--content-max) + 8rem);
+   El hero ES la secuencia de rotación: lienzo a pantalla completa,
+   fijado, con el texto encima. El póster va debajo del lienzo y hace
+   dos trabajos: es el elemento LCP (se pinta sin esperar al JS) y es
+   el respaldo si los fotogramas no llegan a cargar.               */
+.hero { position: relative; }
+
+.hero__stage { background: #070708; }
+
+.hero__poster,
+.hero__poster img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.hero__text { display: grid; gap: 1.75rem; align-content: center; }
+/* En vertical el encuadre completo importa más que llenar la pantalla. */
+@media (max-aspect-ratio: 1 / 1) {
+  .hero__poster img { object-fit: contain; }
+}
+
+/* El lienzo releva al póster en cuanto el JS ha dibujado en él el mismo
+   fotograma con la misma fórmula: el cambio es invisible, sin transición. */
+.hero.seq .seq__canvas { opacity: 0; }
+.hero.seq.is-primed .seq__canvas { opacity: 1; }
+.hero.seq.is-primed .hero__poster { opacity: 0; }
+.hero.seq.is-static .seq__canvas { display: none; }
+.hero.seq.is-static .hero__poster { opacity: 1; }
+
+/* Oscurece el lado del texto sin apagar el producto. */
+.hero__stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(7, 7, 8, 0.92) 0%, rgba(7, 7, 8, 0.45) 38%, rgba(7, 7, 8, 0) 62%),
+    linear-gradient(to bottom, rgba(7, 7, 8, 0.75) 0%, rgba(7, 7, 8, 0) 22%);
+}
+
+.hero__copy {
+  position: absolute;
+  z-index: 2;
+  left: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
+  right: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 34rem;
+  display: grid;
+  gap: 1.6rem;
+  /* Se desvanece con el scroll (lo fija el JS) y deja la pieza limpia. */
+  opacity: var(--hero-copy, 1);
+}
+
 .hero__title {
   font-family: var(--display);
   font-weight: 500;
-  font-size: clamp(2.9rem, 8.4vw, 7rem);
+  font-size: clamp(2.9rem, 7.6vw, 6.4rem);
   line-height: 0.94;
   letter-spacing: -0.025em;
   text-wrap: balance;
 }
+
 .hero__meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.16em;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ash);
 }
 .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--champagne); }
 
-/* La vitrina: recorte vertical, como mirar la pieza tras un cristal. */
-.hero__vitrine { position: relative; }
-/* Sin aspect-ratio impuesto: el póster manda. La zapatilla es ancha y baja,
-   y cualquier recorte vertical le corta el talón o la puntera. */
-.hero__vitrine img {
-  width: 100%;
-  height: auto;
-  border: 1px solid var(--rule);
+/* En vertical el texto baja: la pieza manda arriba. */
+@media (max-aspect-ratio: 1 / 1) {
+  .hero__copy {
+    top: auto;
+    bottom: clamp(2rem, 6vh, 4rem);
+    transform: none;
+    gap: 1.2rem;
+  }
+  /* El degradado tiene que llegar hasta media pantalla: el texto se apoya
+     sobre la suela y sin esto el gris del estudio se lo come. */
+  .hero__stage::after {
+    background: linear-gradient(to top,
+      rgba(7, 7, 8, 0.97) 0%, rgba(7, 7, 8, 0.9) 26%,
+      rgba(7, 7, 8, 0.55) 44%, rgba(7, 7, 8, 0) 66%);
+  }
 }
-.hero__vitrine figcaption {
-  margin-top: 0.9rem;
-  font-size: 0.6875rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--ash);
-}
-@media (max-width: 860px) {
-  .hero { grid-template-columns: 1fr; gap: 3rem; }
+
+/* Sin espina visible no hay razón para sangrar el texto. */
+@media (max-width: 700px) {
+  .hero__copy { left: var(--gutter); }
 }
 
 /* ── 2 · MANIFIESTO ─────────────────────────────────────────── */

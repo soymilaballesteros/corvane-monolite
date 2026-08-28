@@ -102,8 +102,8 @@
    proporción real del fotograma (--seq-ratio, que fija el JS según el juego
    activo), con los textos debajo. Es lo que hace Apple en móvil.            */
 @media (max-aspect-ratio: 1 / 1) {
-  .seq__canvas,
-  .seq__still {
+  .seq:not(.hero) .seq__canvas,
+  .seq:not(.hero) .seq__still {
     inset: auto 0 auto 0;
     top: 11vh;
     height: auto;
@@ -114,7 +114,7 @@
     mask-image: linear-gradient(to bottom, transparent, #000 9%, #000 88%, transparent);
   }
   /* Sin imagen detrás del texto, el viñeteado ya no hace falta. */
-  .seq__pin::after {
+  .seq:not(.hero) .seq__pin::after {
     background: linear-gradient(to top, rgba(11, 11, 12, 0.9) 0%, rgba(11, 11, 12, 0) 30%);
   }
   .seq__ui { bottom: clamp(2rem, 6vh, 4rem); }
@@ -123,6 +123,8 @@
 
 /* Con reduce-motion o sin JS la sección no se fija: altura normal + imagen. */
 .seq.is-static .seq__pin { height: auto; aspect-ratio: 16 / 10; }
+/* El hero conserva la pantalla completa aunque no se anime. */
+.hero.seq.is-static .seq__pin { height: 100svh; aspect-ratio: auto; }
 .seq.is-static .seq__still { position: static; aspect-ratio: auto; }
 .seq.is-static .seq__canvas { display: none; }
 .seq.is-static .beat { opacity: 1; border-left-color: var(--rule); }

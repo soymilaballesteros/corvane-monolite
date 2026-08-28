@@ -243,6 +243,22 @@ function findCustom(name) {
     .find((f) => existsSync(f))
 }
 
+/**
+ * Póster del hero: primer fotograma de la rotación, con exactamente el mismo
+ * recorte y las mismas dimensiones que cada juego. El lienzo lo redibuja con
+ * su misma fórmula de encuadre, así que el relevo es invisible.
+ */
+async function emitHeroPoster(seq, meta, crop, desktop, mobile) {
+  await still(seq.inputAbs, {
+    at: 0.02, crop: 'crop=iw:ih', width: desktop.width, height: desktop.height,
+    quality: 82, out: 'hero-poster.webp',
+  })
+  await still(seq.inputAbs, {
+    at: 0.02, crop: `crop=${crop.width}:${crop.height}:${crop.x}:0`,
+    width: mobile.width, height: mobile.height, quality: 82, out: 'hero-poster-mobile.webp',
+  })
+}
+
 async function emitPageImages() {
   if (!existsSync(REF)) {
     console.log('   (sin sneaker-ref.png: el póster y el atelier se derivan de los clips)')
@@ -262,14 +278,6 @@ async function emitPageImages() {
 
   // Dos anchos: en un móvil el póster se pinta a ~380 px CSS, así que servirle
   // 1200 px es tirar la mitad de los bytes del LCP.
-  const posterCrop = `crop=${crop.width}:${crop.height}:${crop.x}:0`
-  const posterW = 1200
-  const posterH = Math.round(posterW / crop.ratio / 2) * 2
-  await still(REF, { at: 0, crop: posterCrop, width: posterW, height: posterH, quality: 82, out: 'hero-poster.webp' })
-  await still(REF, {
-    at: 0, crop: posterCrop, width: 720,
-    height: Math.round(720 / crop.ratio / 2) * 2, quality: 80, out: 'hero-poster-720.webp',
-  })
 
   // Macros: recorte 4:5 centrado en un punto a lo largo de la pieza.
   const sx0 = subject.x0 * w
@@ -298,7 +306,7 @@ async function emitPageImages() {
       width: CRAFT_W, height: CRAFT_H, quality: 74, out: shot.out,
     })
   }
-  return { poster: { width: posterW, height: posterH }, craft: { width: CRAFT_W, height: CRAFT_H } }
+  return { craft: { width: CRAFT_W, height: CRAFT_H } }
 }
 
 /** Imagen de respaldo de cada secuencia, para reduce-motion o fallo de carga. */
@@ -310,7 +318,20 @@ async function emitFallback(seq, meta) {
   })
 }
 
-async function buildVariant(seq, variant, meta, crop) {
+/** Caja del producto trasladada a coordenadas del fotograma ya recortado. */
+function subjectInFrame(subject, meta, crop) {
+  if (!crop) return { x0: subject.x0, x1: subject.x1, y0: subject.y0, y1: subject.y1 }
+  const px0 = subject.x0 * meta.width
+  const px1 = subject.x1 * meta.width
+  return {
+    x0: Math.max(0, (px0 - crop.x) / crop.width),
+    x1: Math.min(1, (px1 - crop.x) / crop.width),
+    y0: subject.y0,
+    y1: subject.y1,
+  }
+}
+
+async function buildVariant(seq, variant, meta, crop, subject) {
   const budget = BUDGET[variant]
   const tmpDir = path.join(TMP, seq.name, variant)
   const outDir = path.join(OUT_ROOT, seq.name, variant)
@@ -336,7 +357,11 @@ async function buildVariant(seq, variant, meta, crop) {
         `total ${MB(res.total)} MB  ${ok ? '✓' : '✗ excede'}`
       )
       if (ok) {
-        return { count: res.count, width: w, height: h, quality: q, bytes: res.total, avg, max: res.max }
+        return {
+          count: res.count, width: w, height: h, quality: q,
+          bytes: res.total, avg, max: res.max,
+          subject: subjectInFrame(subject, meta, crop),
+        }
       }
     }
     console.log(`   ${variant}: ningún nivel de calidad cabe a ${width}px, bajo resolución…`)
@@ -368,8 +393,9 @@ async function buildSequence(seq) {
   )
 
   await emitFallback(seq, meta)
-  const desktop = await buildVariant(seq, 'desktop', meta)
-  const mobile = await buildVariant(seq, 'mobile', meta, crop)
+  const desktop = await buildVariant(seq, 'desktop', meta, null, subject)
+  const mobile = await buildVariant(seq, 'mobile', meta, crop, subject)
+  if (seq.name === 'rotate') await emitHeroPoster(seq, meta, crop, desktop, mobile)
   await rm(path.join(TMP, seq.name), { recursive: true, force: true })
 
   if (desktop.count !== mobile.count) {
@@ -422,14 +448,6 @@ async function main() {
     )
   }
   console.log(`  ${''.padEnd(8)} TODO: ${MB(grand)} MB`)
-  if (pageImages) {
-    const html = await run('cat', [path.join(ROOT, 'index.html')]).then((r) => r.stdout)
-    const want = `width="${pageImages.poster.width}" height="${pageImages.poster.height}"`
-    if (!html.includes(want)) {
-      console.log(`\n⚠︎  index.html no declara ${want} para el póster del hero.`)
-      console.log(`    Actualízalo o habrá salto de layout (CLS).`)
-    }
-  }
   console.log(`\n✓ manifest → src/frames.manifest.json`)
 }
 

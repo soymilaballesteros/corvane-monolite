@@ -6,7 +6,14 @@ gsap.registerPlugin(ScrollTrigger)
 
 type Variant = 'desktop' | 'mobile'
 
-interface VariantMeta { count: number; width: number; height: number }
+interface SubjectBox { x0: number; x1: number; y0: number; y1: number }
+interface VariantMeta {
+  count: number
+  width: number
+  height: number
+  /** Caja del producto dentro del fotograma, en fracciones de 0 a 1. */
+  subject?: SubjectBox
+}
 interface SequenceMeta { frames: number; desktop: VariantMeta; mobile: VariantMeta }
 
 const MANIFEST = manifest as unknown as Record<string, SequenceMeta | undefined>
@@ -55,6 +62,12 @@ export interface ScrollSequenceOptions {
   name: string
   /** Longitud del pin en % de la altura del viewport (300 = 300vh). */
   lengthVh: number
+  /**
+   * Sección visible nada más cargar (el hero). Precarga en cuanto la página
+   * termina de cargar, sin esperar al primer scroll: aquí la animación ES lo
+   * primero que se ve, y esperar dejaría el hero congelado.
+   */
+  eager?: boolean
   onProgress?: (progress: number) => void
 }
 
@@ -66,11 +79,13 @@ export class ScrollSequence {
   private readonly ctx: CanvasRenderingContext2D | null
   private readonly still: HTMLImageElement | null
   private readonly lengthVh: number
+  private readonly eager: boolean
   private readonly onProgress?: (p: number) => void
 
   private meta: SequenceMeta | undefined
   private variant: Variant = 'desktop'
   private count = 0
+  private subject: SubjectBox = { x0: 0, x1: 1, y0: 0, y1: 1 }
 
   private images: (HTMLImageElement | null)[] = []
   private pending = new Set<number>()
@@ -92,6 +107,7 @@ export class ScrollSequence {
     this.name = opts.name
     this.section = opts.section
     this.lengthVh = opts.lengthVh
+    this.eager = opts.eager ?? false
     this.onProgress = opts.onProgress
 
     this.pin = this.section.querySelector<HTMLElement>('.seq__pin')!
@@ -115,9 +131,27 @@ export class ScrollSequence {
     this.applyVariant(this.mq.matches ? 'mobile' : 'desktop')
     this.mq.addEventListener('change', this.onVariantChange)
 
+    this.primeFromPoster()
     this.mount()
     this.watchViewport()
     window.addEventListener('resize', this.onResize, { passive: true })
+  }
+
+  /**
+   * Pinta en el lienzo la imagen del póster usando exactamente el mismo
+   * encuadre que usará con los fotogramas. Así el relevo del <img> al <canvas>
+   * no produce ningún salto de tamaño ni de posición.
+   */
+  private primeFromPoster(): void {
+    const img = this.section.querySelector<HTMLImageElement>('.hero__poster img')
+    if (!img) return
+    const show = (): void => {
+      if (!img.naturalWidth) return
+      this.drawImage(img)
+      this.section.classList.add('is-primed')
+    }
+    if (img.complete) show()
+    else img.addEventListener('load', show, { once: true })
   }
 
   // ── Carga ────────────────────────────────────────────────────
@@ -126,6 +160,7 @@ export class ScrollSequence {
     this.variant = variant
     const v = this.meta![variant]
     this.count = v.count || this.meta!.frames
+    this.subject = v.subject ?? { x0: 0, x1: 1, y0: 0, y1: 1 }
     // El CSS necesita la proporción REAL del juego activo para dibujar la banda
     // en pantallas verticales sin que `cover` recorte nada.
     this.section.style.setProperty('--seq-ratio', String(v.width / v.height))
@@ -158,7 +193,8 @@ export class ScrollSequence {
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return
         io.disconnect()
-        void afterFirstScroll().then(() => afterLoad(() => void this.preload()))
+        if (this.eager) afterLoad(() => void this.preload())
+        else void afterFirstScroll().then(() => afterLoad(() => void this.preload()))
       },
       { rootMargin: '150% 0px 150% 0px' }
     )
@@ -209,6 +245,14 @@ export class ScrollSequence {
       this.goStatic()
       return
     }
+    this.section.classList.add('is-ready')
+
+    // El relleno fino espera al primer scroll. En el hero la pasada gruesa
+    // tiene que entrar ya (la animación es lo primero que se ve), pero bajar
+    // los 100 fotogramas antes de que nadie toque el scroll son ~840 KB de
+    // carga inicial. Con 1 de cada 4 el giro ya se sigue; el resto llega en
+    // cuanto el usuario empieza a bajar, que es justo cuando hace falta.
+    if (this.eager) await afterFirstScroll()
     await this.runQueue(all.filter((i) => i % COARSE_STEP !== 0))
   }
 
@@ -240,27 +284,73 @@ export class ScrollSequence {
     if (!found) return
     if (found.index === this.drawn && !this.sizeDirty) return
 
+    // Lienzo sin tamaño (sección oculta o aún sin layout): no marques el
+    // fotograma como pintado o no volvería a repintarse nunca.
+    if (this.canvas.clientWidth === 0 || this.canvas.clientHeight === 0) return
+    this.sizeDirty = false
+    this.drawImage(found.img)
+    this.drawn = found.index
+  }
+
+  /** Encuadra y pinta una imagen en el lienzo. */
+  private drawImage(img: HTMLImageElement): void {
+    const ctx = this.ctx
+    if (!ctx) return
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
     const w = Math.round(this.canvas.clientWidth * dpr)
     const h = Math.round(this.canvas.clientHeight * dpr)
-    // Lienzo sin tamaño (sección oculta o aún sin layout): no pintes, y sobre
-    // todo no marques este fotograma como pintado o no se repintará nunca.
     if (w === 0 || h === 0) return
     if (this.canvas.width !== w || this.canvas.height !== h) {
       this.canvas.width = w
       this.canvas.height = h
     }
-    this.sizeDirty = false
+    const iw = img.naturalWidth
+    const ih = img.naturalHeight
 
-    const { img } = found
-    // Ajuste tipo object-fit: cover.
-    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight)
-    const dw = img.naturalWidth * scale
-    const dh = img.naturalHeight * scale
-    ctx.fillStyle = '#0B0B0C'
+    // Llena todo lo posible (como object-fit: cover) PERO sin recortar nunca el
+    // producto. A pantalla completa en vertical, un cover puro se comería más
+    // del 60% del ancho y dejaría la zapatilla sin talón ni puntera.
+    const sub = this.subject
+    const pw = Math.max(1, (sub.x1 - sub.x0) * iw)
+    const ph = Math.max(1, (sub.y1 - sub.y0) * ih)
+    const scale = Math.min(
+      Math.max(w / iw, h / ih),   // cover
+      w / pw,                      // el producto cabe de ancho
+      h / ph                       // …y de alto
+    )
+    const dw = iw * scale
+    const dh = ih * scale
+
+    // Encuadra sobre el producto. En pantallas verticales lo sube al 38% de la
+    // altura en vez de centrarlo: abajo va el texto y si no se solapan.
+    const focusY = h > w ? 0.38 : 0.5
+    const cx = ((sub.x0 + sub.x1) / 2) * iw * scale
+    const cy = ((sub.y0 + sub.y1) / 2) * ih * scale
+    const dx = dw >= w ? Math.min(0, Math.max(w - dw, w / 2 - cx)) : (w - dw) / 2
+    const dy = dh >= h ? Math.min(0, Math.max(h - dh, h * focusY - cy)) : h * focusY - cy
+
+    // El fondo del clip es casi negro puro; igualarlo hace casi invisible el borde.
+    const FILL = '#070708'
+    ctx.fillStyle = FILL
     ctx.fillRect(0, 0, w, h)
-    ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh)
-    this.drawn = found.index
+    ctx.drawImage(img, dx, dy, dw, dh)
+
+    // El suelo del estudio es algo más claro que el relleno, así que donde
+    // termina la imagen se ve una costura. Se funde con un degradado corto.
+    const FADE = Math.round(Math.min(h, w) * 0.12)
+    if (dy > 0) this.fadeEdge(ctx, w, dy, dy + FADE, FILL)
+    if (dy + dh < h) this.fadeEdge(ctx, w, dy + dh, dy + dh - FADE, FILL)
+  }
+
+  /** Degradado vertical del color de relleno hacia transparente, sobre el canto. */
+  private fadeEdge(
+    ctx: CanvasRenderingContext2D, w: number, from: number, to: number, color: string
+  ): void {
+    const g = ctx.createLinearGradient(0, from, 0, to)
+    g.addColorStop(0, color)
+    g.addColorStop(1, 'rgba(7, 7, 8, 0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, Math.min(from, to), w, Math.abs(to - from))
   }
 
   private onResize = (): void => {
