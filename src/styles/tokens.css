@@ -13,11 +13,24 @@
   --sans:    'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', sans-serif;
 
   --gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --spine-x: clamp(1.25rem, 3.2vw, 3rem);
-  /* Sangría izquierda del contenido: deja sitio a la espina. Una sola fuente
-     de verdad, porque se usa en la barra, las secciones y los overlays. */
-  --content-inset: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
-  --content-max: 78rem;
+  --spine-min: clamp(1.25rem, 3.2vw, 3rem);
+  --spine-gap: 4.5rem;
+  --content-max: 96rem;
+  /* Un solo raíl, y el mismo para todo: la barra, las secciones, los overlays
+     y el pie. El contenido cuelga de la espina por la izquierda y llega hasta
+     el margen por la derecha. Pasado --content-max deja de crecer, y entonces
+     el sobrante se reparte a los dos lados en vez de amontonarse a la derecha:
+     con el tope aplicado solo por la izquierda, en un monitor de 1600px las
+     secciones se cortaban 209px antes que la barra y todo parecía desplazado. */
+  --content-inset: max(
+    var(--gutter),
+    calc(var(--spine-min) + var(--spine-gap)),
+    calc((100vw - var(--content-max)) / 2)
+  );
+  --content-edge: max(var(--gutter), calc((100vw - var(--content-max)) / 2));
+  /* La espina se mide desde el contenido, no desde el borde: así conserva su
+     distancia con el texto también cuando el contenido se centra. */
+  --spine-x: max(var(--spine-min), calc(var(--content-inset) - var(--spine-gap)));
 
   --pad-section: clamp(5.5rem, 13vh, 11rem);
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);

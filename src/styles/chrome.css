@@ -50,8 +50,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  padding: 0.9rem var(--gutter);
+  padding-block: 0.9rem;
   padding-left: var(--content-inset);
+  padding-right: var(--content-edge);
   background: linear-gradient(to bottom, var(--ink) 30%, transparent);
   /* Capa propia: Safari en iOS deja un rastro del contenido anterior al hacer
      scroll bajo un elemento fijo, y el logotipo se ve duplicado. */

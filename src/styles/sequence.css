@@ -44,7 +44,7 @@
   z-index: 2;
   left: var(--content-inset);
   bottom: clamp(3rem, 9vh, 6rem);
-  right: var(--gutter);
+  right: var(--content-edge);
   display: grid;
   gap: 0.85rem;
   max-width: 34rem;
@@ -73,7 +73,7 @@
 .seq__hint {
   position: absolute;
   z-index: 2;
-  right: var(--gutter);
+  right: var(--content-edge);
   bottom: clamp(3rem, 9vh, 6rem);
   font-size: 0.625rem;
   letter-spacing: 0.24em;
