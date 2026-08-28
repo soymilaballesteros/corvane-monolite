@@ -124,7 +124,11 @@ export class ScrollSequence {
 
   private applyVariant(variant: Variant): void {
     this.variant = variant
-    this.count = this.meta![variant].count || this.meta!.frames
+    const v = this.meta![variant]
+    this.count = v.count || this.meta!.frames
+    // El CSS necesita la proporción REAL del juego activo para dibujar la banda
+    // en pantallas verticales sin que `cover` recorte nada.
+    this.section.style.setProperty('--seq-ratio', String(v.width / v.height))
     this.images = new Array(this.count).fill(null)
     this.pending.clear()
     this.loadedCount = 0
@@ -171,8 +175,11 @@ export class ScrollSequence {
       await img.decode()
       this.images[i] = img
       this.loadedCount++
-      // En cuanto haya UN frame, pinta: el canvas nunca se queda en negro.
-      if (this.drawn === -1) this.requestPaint()
+      // Mientras el fotograma pintado no sea el que toca, cada carga nueva pide
+      // repintado. Sin esto, si entras en la sección antes de que haya cargado
+      // nada, se pinta el fotograma más cercano como aproximación y el lienzo
+      // se queda ahí para siempre: nada vuelve a pedir que se repinte.
+      if (this.drawn !== this.target) this.requestPaint()
     } catch {
       this.failures++
     } finally {
@@ -234,10 +241,11 @@ export class ScrollSequence {
     if (found.index === this.drawn && !this.sizeDirty) return
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
-    const cw = this.canvas.clientWidth
-    const ch = this.canvas.clientHeight
-    const w = Math.round(cw * dpr)
-    const h = Math.round(ch * dpr)
+    const w = Math.round(this.canvas.clientWidth * dpr)
+    const h = Math.round(this.canvas.clientHeight * dpr)
+    // Lienzo sin tamaño (sección oculta o aún sin layout): no pintes, y sobre
+    // todo no marques este fotograma como pintado o no se repintará nunca.
+    if (w === 0 || h === 0) return
     if (this.canvas.width !== w || this.canvas.height !== h) {
       this.canvas.width = w
       this.canvas.height = h
@@ -286,7 +294,14 @@ export class ScrollSequence {
   private goStatic(): void {
     this.isStatic = true
     this.section.classList.add('is-static')
-    if (this.still) this.still.hidden = false
+    if (this.still) {
+      // La imagen de respaldo se pide solo aquí. Con `src` en el HTML el
+      // navegador la descarga aunque esté oculta, y son ~20 KB que casi nunca
+      // se ven: solo con reduce-motion o si fallan los fotogramas.
+      const src = this.still.dataset.src
+      if (src && !this.still.src) this.still.src = src
+      this.still.hidden = false
+    }
     this.trigger?.kill()
     this.trigger = undefined
   }

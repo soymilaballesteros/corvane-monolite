@@ -95,8 +95,35 @@
 .beat p { font-size: 0.9rem; color: var(--ash); max-width: 34ch; }
 @media (prefers-reduced-motion: reduce) { .beat { opacity: 1; } }
 
+/* ── Pantallas verticales ────────────────────────────────────
+   La zapatilla es ancha y baja. A pantalla completa en vertical, el ajuste
+   `cover` recortaría más del 60% del ancho y la dejaría sin talón ni puntera.
+   En vertical el canvas deja de ser a sangre y pasa a ser una banda con la
+   proporción real del fotograma (--seq-ratio, que fija el JS según el juego
+   activo), con los textos debajo. Es lo que hace Apple en móvil.            */
+@media (max-aspect-ratio: 1 / 1) {
+  .seq__canvas,
+  .seq__still {
+    inset: auto 0 auto 0;
+    top: 11vh;
+    height: auto;
+    aspect-ratio: var(--seq-ratio, 1.25);
+    /* El fondo del clip (#040405) y el de la página (#0B0B0C) no son idénticos
+       y el estudio tiene un degradado: sin esto se ve el canto de la banda. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 9%, #000 88%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 9%, #000 88%, transparent);
+  }
+  /* Sin imagen detrás del texto, el viñeteado ya no hace falta. */
+  .seq__pin::after {
+    background: linear-gradient(to top, rgba(11, 11, 12, 0.9) 0%, rgba(11, 11, 12, 0) 30%);
+  }
+  .seq__ui { bottom: clamp(2rem, 6vh, 4rem); }
+  .seq__title { font-size: clamp(2.2rem, 11vw, 3.4rem); }
+}
+
 /* Con reduce-motion o sin JS la sección no se fija: altura normal + imagen. */
 .seq.is-static .seq__pin { height: auto; aspect-ratio: 16 / 10; }
+.seq.is-static .seq__still { position: static; aspect-ratio: auto; }
 .seq.is-static .seq__canvas { display: none; }
 .seq.is-static .beat { opacity: 1; border-left-color: var(--rule); }
 

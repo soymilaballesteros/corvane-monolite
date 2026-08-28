@@ -73,22 +73,86 @@ async function probe(file) {
   }
 }
 
-/** Filtro de vídeo por juego. mobile recorta al centro en 3:4 antes de escalar. */
-function videoFilter(variant, width) {
-  return variant === 'mobile'
-    ? `crop=floor(ih*3/8)*2:ih,scale=${width}:-2:flags=lanczos`
+
+/**
+ * Mide la caja que ocupa el producto a lo largo de TODO el clip.
+ * Saca el vídeo en gris a baja resolución y busca, por columna y por fila,
+ * el píxel más claro: el fondo de estudio ronda 4-30 y el producto pasa de 90.
+ * Hace falta porque el recorte de móvil no puede asumir que la IA haya
+ * centrado el producto — en el clip del despiece quedó desplazado 25 px.
+ */
+async function measureSubject(input) {
+  const W = 192, H = 108, T = 70
+  const { stdout } = await run('ffmpeg',
+    ['-hide_banner', '-loglevel', 'error', '-i', input,
+     '-vf', `scale=${W}:${H},format=gray`, '-f', 'rawvideo', '-'],
+    { encoding: 'buffer', maxBuffer: 1 << 30 })
+  const buf = stdout
+  const frames = Math.floor(buf.length / (W * H))
+  const colMax = new Array(W).fill(0)
+  const rowMax = new Array(H).fill(0)
+  for (let f = 0; f < frames; f++) {
+    const off = f * W * H
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const v = buf[off + y * W + x]
+        if (v > colMax[x]) colMax[x] = v
+        if (v > rowMax[y]) rowMax[y] = v
+      }
+    }
+  }
+  const first = (a) => { const i = a.findIndex((v) => v >= T); return i < 0 ? 0 : i }
+  const last = (a) => { const i = [...a].reverse().findIndex((v) => v >= T); return i < 0 ? a.length - 1 : a.length - 1 - i }
+  return {
+    x0: first(colMax) / W, x1: last(colMax) / W,
+    y0: first(rowMax) / H, y1: last(rowMax) / H,
+  }
+}
+
+/** Relaciones de aspecto candidatas para móvil, de la más cerrada a la más abierta. */
+const MOBILE_RATIOS = [
+  ['1:1', 1], ['5:4', 1.25], ['4:3', 4 / 3], ['3:2', 1.5], ['16:9', 16 / 9],
+]
+const SUBJECT_MARGIN = 0.06
+
+/**
+ * Elige el recorte vertical más cerrado que contenga el producto con margen,
+ * centrado sobre EL PRODUCTO (no sobre el frame) y sin salirse de la imagen.
+ */
+function pickMobileCrop(subject, srcW, srcH) {
+  const sx0 = subject.x0 * srcW
+  const sx1 = subject.x1 * srcW
+  const need = (sx1 - sx0) * (1 + SUBJECT_MARGIN * 2)
+  const mid = (sx0 + sx1) / 2
+
+  for (const [label, ratio] of MOBILE_RATIOS) {
+    const cw = Math.min(srcW, Math.round(srcH * ratio))
+    if (cw < need) continue
+    let x = Math.round(mid - cw / 2)
+    x = Math.max(0, Math.min(srcW - cw, x))
+    if (x <= sx0 && x + cw >= sx1) {
+      return { label, width: cw, height: srcH, x, ratio }
+    }
+  }
+  return { label: 'completo', width: srcW, height: srcH, x: 0, ratio: srcW / srcH }
+}
+
+/** Filtro de vídeo por juego. */
+function videoFilter(variant, width, crop) {
+  return variant === 'mobile' && crop
+    ? `crop=${crop.width}:${crop.height}:${crop.x}:0,scale=${width}:-2:flags=lanczos`
     : `scale=${width}:-2:flags=lanczos`
 }
 
 /** Extrae exactamente `count` PNG repartidos de forma uniforme por todo el clip. */
-async function extractPngs(input, dir, { variant, width, count, duration }) {
+async function extractPngs(input, dir, { variant, width, count, duration, crop }) {
   await rm(dir, { recursive: true, force: true })
   await mkdir(dir, { recursive: true })
   const fps = count / duration
   await run('ffmpeg', [
     '-hide_banner', '-loglevel', 'error',
     '-i', input,
-    '-vf', `${videoFilter(variant, width)},fps=${fps.toFixed(6)}`,
+    '-vf', `${videoFilter(variant, width, crop)},fps=${fps.toFixed(6)}`,
     '-frames:v', String(count),
     '-vsync', '0',
     path.join(dir, 'f-%05d.png'),
@@ -150,45 +214,110 @@ async function still(input, { at, crop, width, height, quality, out }) {
   return size
 }
 
-async function emitStills(seq, meta) {
-  const d = meta.duration
-  // Recortes centrados calculados sobre la altura, así valen para cualquier fuente.
-  const crop34 = 'crop=floor(ih*3/8)*2:ih'
-  const crop45 = 'crop=floor(ih*2/5)*2:ih'
+/**
+ * Imágenes de página: póster del hero y los tres retratos del atelier.
+ * Salen de `assets/source/sneaker-ref.png` (4K) si existe, porque tiene mucha
+ * más resolución que un fotograma de vídeo; si no, del propio clip.
+ * Los recortes se calculan sobre la caja medida del producto, nunca sobre el
+ * centro del encuadre: la IA no centra el producto de forma fiable.
+ */
+const REF = path.join(ROOT, 'assets', 'source', 'sneaker-ref.png')
 
-  if (seq.name === 'rotate') {
-    await still(seq.inputAbs, { at: 0.05, crop: crop34, width: 900, height: 1200, quality: 80, out: 'hero-poster.webp' })
-    await still(seq.inputAbs, { at: 0.05, crop: 'crop=iw:ih', width: 1440, height: 810, quality: 72, out: 'fallback-rotate.webp' })
-    // Atelier: usa las imágenes generadas si existen; si no, recorta el clip.
-    const shots = [
-      ['craft-curtido.webp', 0.15, 'atelier-curtido'],
-      ['craft-montado.webp', 0.45, 'atelier-montado'],
-      ['craft-patina.webp', 0.75, 'atelier-patina'],
-    ]
-    for (const [out, frac, source] of shots) {
-      const custom = ['png', 'jpg', 'jpeg', 'webp']
-        .map((ext) => path.join(ROOT, 'assets', 'source', `${source}.${ext}`))
-        .find((f) => existsSync(f))
-      if (custom) {
-        await still(custom, { at: 0, crop: crop45, width: 800, height: 1000, quality: 78, out })
-      } else {
-        await still(seq.inputAbs, { at: d * frac, crop: crop45, width: 800, height: 1000, quality: 75, out })
-      }
-    }
-  } else if (seq.name === 'explode') {
-    // Casi al final: la pieza ya está completamente desplegada.
-    await still(seq.inputAbs, { at: Math.max(0, d - 0.3), crop: 'crop=iw:ih', width: 1440, height: 810, quality: 72, out: 'fallback-explode.webp' })
-  }
+/**
+ * Tres macros del producto. `at`/`yAt` los sitúan sobre la pieza y `zoom` fija
+ * el alto del recorte respecto al alto del producto. Las tres cosas varían a
+ * propósito: con el mismo encuadre y la misma escala, puestas en fila parecen
+ * una sola foto cortada en tiras.
+ */
+const CRAFT_SHOTS = [
+  { out: 'craft-curtido.webp', at: 0.45, yAt: 0.40, zoom: 0.78, custom: 'atelier-curtido' },
+  { out: 'craft-montado.webp', at: 0.13, yAt: 0.52, zoom: 1.15, custom: 'atelier-montado' },
+  { out: 'craft-patina.webp', at: 0.86, yAt: 0.58, zoom: 0.90, custom: 'atelier-patina' },
+]
+const CRAFT_W = 720
+const CRAFT_H = 900
+
+function findCustom(name) {
+  return ['png', 'jpg', 'jpeg', 'webp']
+    .map((ext) => path.join(ROOT, 'assets', 'source', `${name}.${ext}`))
+    .find((f) => existsSync(f))
 }
 
-async function buildVariant(seq, variant, meta) {
+async function emitPageImages() {
+  if (!existsSync(REF)) {
+    console.log('   (sin sneaker-ref.png: el póster y el atelier se derivan de los clips)')
+    return null
+  }
+  const { stdout } = await run('ffprobe', ['-v', 'error', '-select_streams', 'v:0',
+    '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', REF])
+  const [w, h] = stdout.trim().split('x').map(Number)
+  const subject = await measureSubject(REF)
+  const crop = pickMobileCrop(subject, w, h)
+
+  console.log(`\n▸ imágenes de página  ←  assets/source/sneaker-ref.png (${w}x${h})`)
+  console.log(
+    `   producto en x ${Math.round(subject.x0 * w)}..${Math.round(subject.x1 * w)} ` +
+    `· póster ${crop.label} desde x=${crop.x}`
+  )
+
+  // Dos anchos: en un móvil el póster se pinta a ~380 px CSS, así que servirle
+  // 1200 px es tirar la mitad de los bytes del LCP.
+  const posterCrop = `crop=${crop.width}:${crop.height}:${crop.x}:0`
+  const posterW = 1200
+  const posterH = Math.round(posterW / crop.ratio / 2) * 2
+  await still(REF, { at: 0, crop: posterCrop, width: posterW, height: posterH, quality: 82, out: 'hero-poster.webp' })
+  await still(REF, {
+    at: 0, crop: posterCrop, width: 720,
+    height: Math.round(720 / crop.ratio / 2) * 2, quality: 80, out: 'hero-poster-720.webp',
+  })
+
+  // Macros: recorte 4:5 centrado en un punto a lo largo de la pieza.
+  const sx0 = subject.x0 * w
+  const sx1 = subject.x1 * w
+  const sy0 = subject.y0 * h
+  const sy1 = subject.y1 * h
+  for (const shot of CRAFT_SHOTS) {
+    const source = findCustom(shot.custom)
+    if (source) {
+      await still(source, {
+        at: 0, crop: 'crop=floor(ih*4/5/2)*2:ih',
+        width: CRAFT_W, height: CRAFT_H, quality: 80, out: shot.out,
+      })
+      continue
+    }
+    const ch = Math.min(h, Math.round((sy1 - sy0) * shot.zoom))
+    const cw = Math.min(w, Math.round((ch * CRAFT_W) / CRAFT_H))
+    const cx = Math.max(0, Math.min(w - cw, Math.round(sx0 + (sx1 - sx0) * shot.at - cw / 2)))
+    const cy = Math.max(0, Math.min(h - ch, Math.round(sy0 + (sy1 - sy0) * shot.yAt - ch / 2)))
+    const upscale = CRAFT_H / ch
+    if (upscale > 1.35) {
+      console.log(`   ⚠︎ ${shot.out}: recorte ${cw}x${ch} escalaría x${upscale.toFixed(2)}; se verá blando.`)
+    }
+    await still(REF, {
+      at: 0, crop: `crop=${cw}:${ch}:${cx}:${cy}`,
+      width: CRAFT_W, height: CRAFT_H, quality: 74, out: shot.out,
+    })
+  }
+  return { poster: { width: posterW, height: posterH }, craft: { width: CRAFT_W, height: CRAFT_H } }
+}
+
+/** Imagen de respaldo de cada secuencia, para reduce-motion o fallo de carga. */
+async function emitFallback(seq, meta) {
+  const at = seq.name === 'explode' ? Math.max(0, meta.duration - 0.3) : 0.05
+  await still(seq.inputAbs, {
+    at, crop: 'crop=iw:ih', width: 1440, height: 810, quality: 72,
+    out: `fallback-${seq.name}.webp`,
+  })
+}
+
+async function buildVariant(seq, variant, meta, crop) {
   const budget = BUDGET[variant]
   const tmpDir = path.join(TMP, seq.name, variant)
   const outDir = path.join(OUT_ROOT, seq.name, variant)
 
   for (const width of budget.widths) {
     const pngs = await extractPngs(seq.inputAbs, tmpDir, {
-      variant, width, count: seq.frames, duration: meta.duration,
+      variant, width, count: seq.frames, duration: meta.duration, crop,
     })
     // Dimensiones reales del primer PNG (el filtro -2 redondea a par).
     const { stdout } = await run('ffprobe', [
@@ -230,9 +359,17 @@ async function buildSequence(seq) {
     `${meta.fps.toFixed(2)} fps · objetivo ${seq.frames} frames`
   )
 
-  await emitStills(seq, meta)
+  const subject = await measureSubject(seq.inputAbs)
+  const crop = pickMobileCrop(subject, meta.width, meta.height)
+  console.log(
+    `   producto en x ${Math.round(subject.x0 * meta.width)}..${Math.round(subject.x1 * meta.width)} ` +
+    `(${Math.round((subject.x1 - subject.x0) * 100)}% del ancho) · ` +
+    `recorte móvil ${crop.label} → ${crop.width}x${crop.height} desde x=${crop.x}`
+  )
+
+  await emitFallback(seq, meta)
   const desktop = await buildVariant(seq, 'desktop', meta)
-  const mobile = await buildVariant(seq, 'mobile', meta)
+  const mobile = await buildVariant(seq, 'mobile', meta, crop)
   await rm(path.join(TMP, seq.name), { recursive: true, force: true })
 
   if (desktop.count !== mobile.count) {
@@ -265,7 +402,9 @@ async function main() {
     ? JSON.parse(await run('cat', [MANIFEST]).then((r) => r.stdout))
     : {}
 
+  const pageImages = await emitPageImages()
   for (const seq of list) manifest[seq.name] = await buildSequence(seq)
+  if (pageImages) manifest.images = pageImages
 
   await mkdir(path.dirname(MANIFEST), { recursive: true })
   await writeFile(MANIFEST, JSON.stringify(manifest, null, 2) + '\n')
@@ -274,6 +413,7 @@ async function main() {
   console.log('\n── Resumen ──')
   let grand = 0
   for (const [name, s] of Object.entries(manifest)) {
+    if (!s.desktop) continue
     const t = s.desktop.bytes + s.mobile.bytes
     grand += t
     console.log(
@@ -282,6 +422,14 @@ async function main() {
     )
   }
   console.log(`  ${''.padEnd(8)} TODO: ${MB(grand)} MB`)
+  if (pageImages) {
+    const html = await run('cat', [path.join(ROOT, 'index.html')]).then((r) => r.stdout)
+    const want = `width="${pageImages.poster.width}" height="${pageImages.poster.height}"`
+    if (!html.includes(want)) {
+      console.log(`\n⚠︎  index.html no declara ${want} para el póster del hero.`)
+      console.log(`    Actualízalo o habrá salto de layout (CLS).`)
+    }
+  }
   console.log(`\n✓ manifest → src/frames.manifest.json`)
 }
 

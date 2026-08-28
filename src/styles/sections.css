@@ -4,7 +4,7 @@
 .hero {
   min-height: 100svh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   align-items: center;
   gap: clamp(2rem, 6vw, 5rem);
   padding-block: clamp(8rem, 18vh, 12rem) clamp(4rem, 8vh, 7rem);
@@ -32,10 +32,11 @@
 
 /* La vitrina: recorte vertical, como mirar la pieza tras un cristal. */
 .hero__vitrine { position: relative; }
+/* Sin aspect-ratio impuesto: el póster manda. La zapatilla es ancha y baja,
+   y cualquier recorte vertical le corta el talón o la puntera. */
 .hero__vitrine img {
   width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
+  height: auto;
   border: 1px solid var(--rule);
 }
 .hero__vitrine figcaption {
@@ -47,7 +48,6 @@
 }
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; gap: 3rem; }
-  .hero__vitrine img { aspect-ratio: 4 / 3; }
 }
 
 /* ── 2 · MANIFIESTO ─────────────────────────────────────────── */

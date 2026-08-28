@@ -7,7 +7,9 @@
 <meta name="description" content="El MONOLITE se corta de una única pieza de becerro curtido durante cuarenta y dos días. Sin costuras. Ciento veinte pares numerados. Florencia, desde 1911." />
 <meta name="theme-color" content="#0B0B0C" />
 <script>document.documentElement.dataset.js="1"</script>
-<link rel="preload" as="image" href="/img/hero-poster.webp" fetchpriority="high" />
+<link rel="preload" as="image" href="/img/hero-poster.webp"
+      imagesrcset="/img/hero-poster-720.webp 720w, /img/hero-poster.webp 1200w"
+      imagesizes="(max-width: 860px) 92vw, 48vw" fetchpriority="high" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230B0B0C'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23C6A664' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
@@ -33,21 +35,24 @@
   <!-- 1 ── HERO -->
   <section class="hero">
     <div class="hero__text">
-      <p class="eyebrow reveal">Florencia · desde 1911</p>
-      <h1 class="hero__title reveal">Una sola pieza<br />de piel.</h1>
-      <p class="lede reveal">
+      <p class="eyebrow">Florencia · desde 1911</p>
+      <h1 class="hero__title">Una sola pieza<br />de piel.</h1>
+      <p class="lede">
         El upper del <em>Monolite</em> se corta de una única pieza de becerro.
         Sin costuras que lo dividan. Sin logotipo que lo explique.
       </p>
-      <div class="hero__meta reveal">
+      <div class="hero__meta">
         <span>Edición de 120 pares</span>
         <span class="dot"></span>
         <span>Horma CV-11</span>
       </div>
     </div>
-    <figure class="hero__vitrine reveal">
-      <img src="/img/hero-poster.webp" alt="El Corvane Monolite, de perfil, sobre fondo de estudio gris carbón."
-           width="900" height="1200" fetchpriority="high" decoding="async" />
+    <figure class="hero__vitrine">
+      <img src="/img/hero-poster.webp"
+           srcset="/img/hero-poster-720.webp 720w, /img/hero-poster.webp 1200w"
+           sizes="(max-width: 860px) 92vw, 48vw"
+           alt="El Corvane Monolite de tres cuartos, sobre fondo de estudio gris carbón."
+           width="1200" height="960" fetchpriority="high" decoding="async" />
       <figcaption>Monolite · Naturale</figcaption>
     </figure>
   </section>
@@ -69,7 +74,7 @@
   <section class="seq" id="pieza" data-seq="rotate" data-length="300">
     <div class="seq__pin">
       <canvas class="seq__canvas" aria-hidden="true"></canvas>
-      <img class="seq__still" src="/img/fallback-rotate.webp" alt="El Corvane Monolite girando sobre su eje." hidden />
+      <img class="seq__still" data-src="/img/fallback-rotate.webp" alt="El Corvane Monolite girando sobre su eje." width="1440" height="810" loading="lazy" decoding="async" hidden />
       <div class="seq__ui">
         <p class="eyebrow">La pieza</p>
         <h2 class="seq__title">Monolite</h2>
@@ -87,17 +92,17 @@
     <h2 class="section-title reveal">El atelier</h2>
     <div class="crafts">
       <article class="craft reveal">
-        <figure><img src="/img/craft-curtido.webp" alt="Pieles reposando en fosos de curtido vegetal." width="800" height="1000" loading="lazy" decoding="async" /></figure>
+        <figure><img src="/img/craft-curtido.webp" alt="Macro del grano de la piel de becerro del Monolite." width="720" height="900" loading="lazy" decoding="async" /></figure>
         <h3>El curtido</h3>
         <p>Cuarenta y dos días en fosos de corteza de roble. La piel sale más lenta y más viva: el color no se aplica, se gana.</p>
       </article>
       <article class="craft reveal">
-        <figure><img src="/img/craft-montado.webp" alt="Un artesano tensando la piel sobre la horma de madera." width="800" height="1000" loading="lazy" decoding="async" /></figure>
+        <figure><img src="/img/craft-montado.webp" alt="El talón y el cuello del Monolite, con la forma que deja la horma." width="720" height="900" loading="lazy" decoding="async" /></figure>
         <h3>El montado</h3>
         <p>La piel se tensa sobre la horma con tenazas y reposa tres días. Es la única parte del proceso que no se puede acelerar sin que se note a los seis meses.</p>
       </article>
       <article class="craft reveal">
-        <figure><img src="/img/craft-patina.webp" alt="Aplicación de pátina a mano con algodón sobre el cuero." width="800" height="1000" loading="lazy" decoding="async" /></figure>
+        <figure><img src="/img/craft-patina.webp" alt="La puntera del Monolite, con la pátina quemada a mano." width="720" height="900" loading="lazy" decoding="async" /></figure>
         <h3>La pátina</h3>
         <p>El color se da a mano, capa sobre capa, con algodón. Ningún par sale igual que otro: es la firma de quien lo hizo.</p>
       </article>
@@ -108,7 +113,7 @@
   <section class="seq" id="anatomia" data-seq="explode" data-length="400">
     <div class="seq__pin">
       <canvas class="seq__canvas" aria-hidden="true"></canvas>
-      <img class="seq__still" src="/img/fallback-explode.webp" alt="El Monolite despiezado en sus cuatro capas." hidden />
+      <img class="seq__still" data-src="/img/fallback-explode.webp" alt="El Monolite despiezado en sus cuatro capas." width="1440" height="810" loading="lazy" decoding="async" hidden />
       <div class="seq__ui seq__ui--left">
         <p class="eyebrow">Anatomía</p>
         <ol class="beats">

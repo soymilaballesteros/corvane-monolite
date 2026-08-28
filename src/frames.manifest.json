@@ -1,25 +1,4 @@
 {
-  "rotate": {
-    "frames": 100,
-    "desktop": {
-      "count": 100,
-      "width": 1440,
-      "height": 810,
-      "quality": 72,
-      "bytes": 462782,
-      "avg": 4627.82,
-      "max": 5302
-    },
-    "mobile": {
-      "count": 100,
-      "width": 720,
-      "height": 960,
-      "quality": 72,
-      "bytes": 415404,
-      "avg": 4154.04,
-      "max": 4916
-    }
-  },
   "explode": {
     "frames": 120,
     "desktop": {
@@ -27,18 +6,49 @@
       "width": 1440,
       "height": 810,
       "quality": 72,
-      "bytes": 346444,
-      "avg": 2887.0333333333333,
-      "max": 3258
+      "bytes": 2834582,
+      "avg": 23621.516666666666,
+      "max": 26456
     },
     "mobile": {
       "count": 120,
       "width": 720,
-      "height": 960,
+      "height": 576,
       "quality": 72,
-      "bytes": 247980,
-      "avg": 2066.5,
-      "max": 2444
+      "bytes": 1567446,
+      "avg": 13062.05,
+      "max": 14764
+    }
+  },
+  "images": {
+    "poster": {
+      "width": 1200,
+      "height": 960
+    },
+    "craft": {
+      "width": 720,
+      "height": 900
+    }
+  },
+  "rotate": {
+    "frames": 100,
+    "desktop": {
+      "count": 100,
+      "width": 1440,
+      "height": 810,
+      "quality": 72,
+      "bytes": 1757222,
+      "avg": 17572.22,
+      "max": 21576
+    },
+    "mobile": {
+      "count": 100,
+      "width": 720,
+      "height": 540,
+      "quality": 72,
+      "bytes": 882720,
+      "avg": 8827.2,
+      "max": 10850
     }
   }
 }

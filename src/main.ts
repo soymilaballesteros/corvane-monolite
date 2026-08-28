@@ -68,10 +68,31 @@ initForm()
 initSequences()
 initHud()
 
-// El pin se calcula con el layout final: si las fuentes o el póster del hero
-// cambian la altura después, el pin queda descuadrado y la animación "no avanza".
-document.fonts?.ready.then(() => ScrollTrigger.refresh())
-window.addEventListener('load', () => ScrollTrigger.refresh())
+/**
+ * El pin debe calcularse con el layout FINAL: si las fuentes o el póster del
+ * hero cambian la altura después, queda descuadrado y la animación "no avanza".
+ *
+ * Pero cada refresh vuelve a medir los dos pins sobre un documento de ~14.000 px
+ * y cuesta cerca de un segundo de cálculo de estilos en un móvil modesto. Con
+ * dos llamadas sueltas (fuentes + load) el Total Blocking Time se disparaba a
+ * más de 1 s. Aquí se espera a que ocurran ambas cosas y se refresca UNA vez.
+ */
+function refreshOnce(): void {
+  let pending = 2
+  const done = (): void => {
+    if (--pending > 0) return
+    requestAnimationFrame(() => ScrollTrigger.refresh())
+  }
+  if (document.fonts) document.fonts.ready.then(done, done)
+  else done()
+  if (document.readyState === 'complete') done()
+  else window.addEventListener('load', done, { once: true })
+}
+
+// La barra de direcciones del móvil cambia de alto al hacer scroll; sin esto,
+// ScrollTrigger se refresca en mitad del scroll y provoca tirones.
+ScrollTrigger.config({ ignoreMobileResize: true })
+refreshOnce()
 
 // Puente para la verificación automatizada en navegador.
 declare global {
