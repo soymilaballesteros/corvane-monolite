@@ -1,0 +1,44 @@
+{
+  "rotate": {
+    "frames": 100,
+    "desktop": {
+      "count": 100,
+      "width": 1440,
+      "height": 810,
+      "quality": 72,
+      "bytes": 462782,
+      "avg": 4627.82,
+      "max": 5302
+    },
+    "mobile": {
+      "count": 100,
+      "width": 720,
+      "height": 960,
+      "quality": 72,
+      "bytes": 415404,
+      "avg": 4154.04,
+      "max": 4916
+    }
+  },
+  "explode": {
+    "frames": 120,
+    "desktop": {
+      "count": 120,
+      "width": 1440,
+      "height": 810,
+      "quality": 72,
+      "bytes": 346444,
+      "avg": 2887.0333333333333,
+      "max": 3258
+    },
+    "mobile": {
+      "count": 120,
+      "width": 720,
+      "height": 960,
+      "quality": 72,
+      "bytes": 247980,
+      "avg": 2066.5,
+      "max": 2444
+    }
+  }
+}

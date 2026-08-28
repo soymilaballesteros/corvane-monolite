@@ -1,0 +1,21 @@
+/* Paleta sacada del propio producto: el fondo del estudio, la luz de borde
+   champán sobre el cuero y el forro de cabritilla color hueso. */
+:root {
+  --ink:        #0B0B0C;
+  --ink-2:      #131316;
+  --bone:       #E8E3D9;
+  --ash:        #7C7970;
+  --champagne:  #C6A664;
+  --rule:       rgba(232, 227, 217, 0.13);
+  --rule-strong:rgba(232, 227, 217, 0.24);
+
+  --display: 'Bodoni Moda Variable', Didot, 'Bodoni MT', 'Times New Roman', serif;
+  --sans:    'Instrument Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --spine-x: clamp(1.25rem, 3.2vw, 3rem);
+  --content-max: 78rem;
+
+  --pad-section: clamp(5.5rem, 13vh, 11rem);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}

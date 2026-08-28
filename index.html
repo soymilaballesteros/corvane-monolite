@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CORVANE — MONOLITE. Una sola pieza de piel.</title>
+<meta name="description" content="El MONOLITE se corta de una única pieza de becerro curtido durante cuarenta y dos días. Sin costuras. Ciento veinte pares numerados. Florencia, desde 1911." />
+<meta name="theme-color" content="#0B0B0C" />
+<script>document.documentElement.dataset.js="1"</script>
+<link rel="preload" as="image" href="/img/hero-poster.webp" fetchpriority="high" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230B0B0C'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23C6A664' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+
+<!-- ── Espina: una línea continua de arriba abajo. El producto no tiene costuras; la página tampoco. -->
+<div class="spine" aria-hidden="true">
+  <div class="spine__track"><div class="spine__fill" id="spineFill"></div></div>
+  <span class="spine__label" id="spineLabel">Florencia</span>
+</div>
+
+<header class="topbar">
+  <a class="wordmark" href="#top">Corvane</a>
+  <nav class="topnav">
+    <a href="#atelier">Atelier</a>
+    <a href="#anatomia">Anatomía</a>
+    <a href="#coleccion">Colección</a>
+    <a class="topnav__cta" href="#cita">Solicitar un par</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- 1 ── HERO -->
+  <section class="hero">
+    <div class="hero__text">
+      <p class="eyebrow reveal">Florencia · desde 1911</p>
+      <h1 class="hero__title reveal">Una sola pieza<br />de piel.</h1>
+      <p class="lede reveal">
+        El upper del <em>Monolite</em> se corta de una única pieza de becerro.
+        Sin costuras que lo dividan. Sin logotipo que lo explique.
+      </p>
+      <div class="hero__meta reveal">
+        <span>Edición de 120 pares</span>
+        <span class="dot"></span>
+        <span>Horma CV-11</span>
+      </div>
+    </div>
+    <figure class="hero__vitrine reveal">
+      <img src="/img/hero-poster.webp" alt="El Corvane Monolite, de perfil, sobre fondo de estudio gris carbón."
+           width="900" height="1200" fetchpriority="high" decoding="async" />
+      <figcaption>Monolite · Naturale</figcaption>
+    </figure>
+  </section>
+
+  <!-- 2 ── MANIFIESTO -->
+  <section class="manifesto" id="manifiesto">
+    <p class="manifesto__body reveal">
+      No hacemos zapatillas rápidas.
+      Una piel curtida durante cuarenta y dos días no admite prisa,
+      y una horma tallada a mano tampoco.
+    </p>
+    <p class="manifesto__body reveal">
+      En Via dei Serragli salen ciento veinte pares al año.
+      El resto del tiempo se emplea en mirar.
+    </p>
+  </section>
+
+  <!-- 3 ── LA PIEZA · secuencia rotación -->
+  <section class="seq" id="pieza" data-seq="rotate" data-length="300">
+    <div class="seq__pin">
+      <canvas class="seq__canvas" aria-hidden="true"></canvas>
+      <img class="seq__still" src="/img/fallback-rotate.webp" alt="El Corvane Monolite girando sobre su eje." hidden />
+      <div class="seq__ui">
+        <p class="eyebrow">La pieza</p>
+        <h2 class="seq__title">Monolite</h2>
+        <dl class="seq__facts">
+          <div><dt>Horma</dt><dd>CV-11</dd></div>
+          <div><dt>Edición</dt><dd>120 pares</dd></div>
+        </dl>
+      </div>
+      <p class="seq__hint">Desplázate para girarla</p>
+    </div>
+  </section>
+
+  <!-- 4 ── ATELIER -->
+  <section class="atelier" id="atelier">
+    <h2 class="section-title reveal">El atelier</h2>
+    <div class="crafts">
+      <article class="craft reveal">
+        <figure><img src="/img/craft-curtido.webp" alt="Pieles reposando en fosos de curtido vegetal." width="800" height="1000" loading="lazy" decoding="async" /></figure>
+        <h3>El curtido</h3>
+        <p>Cuarenta y dos días en fosos de corteza de roble. La piel sale más lenta y más viva: el color no se aplica, se gana.</p>
+      </article>
+      <article class="craft reveal">
+        <figure><img src="/img/craft-montado.webp" alt="Un artesano tensando la piel sobre la horma de madera." width="800" height="1000" loading="lazy" decoding="async" /></figure>
+        <h3>El montado</h3>
+        <p>La piel se tensa sobre la horma con tenazas y reposa tres días. Es la única parte del proceso que no se puede acelerar sin que se note a los seis meses.</p>
+      </article>
+      <article class="craft reveal">
+        <figure><img src="/img/craft-patina.webp" alt="Aplicación de pátina a mano con algodón sobre el cuero." width="800" height="1000" loading="lazy" decoding="async" /></figure>
+        <h3>La pátina</h3>
+        <p>El color se da a mano, capa sobre capa, con algodón. Ningún par sale igual que otro: es la firma de quien lo hizo.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 5 ── ANATOMÍA · secuencia despiece -->
+  <section class="seq" id="anatomia" data-seq="explode" data-length="400">
+    <div class="seq__pin">
+      <canvas class="seq__canvas" aria-hidden="true"></canvas>
+      <img class="seq__still" src="/img/fallback-explode.webp" alt="El Monolite despiezado en sus cuatro capas." hidden />
+      <div class="seq__ui seq__ui--left">
+        <p class="eyebrow">Anatomía</p>
+        <ol class="beats">
+          <li class="beat is-on"><h3>El upper</h3><p>Una pieza de becerro. Ninguna costura que lo divida.</p></li>
+          <li class="beat"><h3>Forro y plantilla</h3><p>Cabritilla cosida a mano sobre un lecho de corcho.</p></li>
+          <li class="beat"><h3>La mediasuela</h3><p>Corcho natural. A los diez días ya tiene tu forma.</p></li>
+          <li class="beat"><h3>La suela</h3><p>Caucho vulcanizado, unido con cosido Blake. Sustituible de por vida.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 ── FICHA TÉCNICA -->
+  <section class="spec" id="ficha">
+    <h2 class="section-title reveal">Ficha técnica</h2>
+    <dl class="spec__list">
+      <div class="spec__row reveal"><dt>Horma</dt><dd>CV-11, tallada a mano en haya</dd></div>
+      <div class="spec__row reveal"><dt>Piel</dt><dd>Becerro Vachetta, curtido vegetal 42 días</dd></div>
+      <div class="spec__row reveal"><dt>Construcción</dt><dd>Cosido Blake, montado a mano</dd></div>
+      <div class="spec__row reveal"><dt>Componentes</dt><dd>68</dd></div>
+      <div class="spec__row reveal"><dt>Mediasuela</dt><dd>Corcho natural moldeado</dd></div>
+      <div class="spec__row reveal"><dt>Suela</dt><dd>Caucho vulcanizado y cuero</dd></div>
+      <div class="spec__row reveal"><dt>Taller</dt><dd>34 horas por par</dd></div>
+      <div class="spec__row reveal"><dt>Edición</dt><dd>120 pares numerados</dd></div>
+      <div class="spec__row reveal"><dt>Garantía</dt><dd>5 años · restauración de por vida</dd></div>
+    </dl>
+  </section>
+
+  <!-- 7 ── HERITAGE -->
+  <section class="heritage" id="heritage">
+    <h2 class="section-title reveal">Ciento quince años</h2>
+    <ol class="timeline">
+      <li class="reveal"><span class="year">1911</span><p>Ludovico Corvane abre un taller de calzado en Via dei Serragli, Florencia.</p></li>
+      <li class="reveal"><span class="year">1948</span><p>Se talla la CV-01, la primera horma propia de la casa. Aún se conserva.</p></li>
+      <li class="reveal"><span class="year">1974</span><p>La casa fija el curtido vegetal de cuarenta y dos días. No ha cambiado desde entonces.</p></li>
+      <li class="reveal"><span class="year">2009</span><p>El atelier presenta su primera silueta baja.</p></li>
+      <li class="reveal"><span class="year">2026</span><p>Monolite. Un upper de una sola pieza. Ciento veinte pares.</p></li>
+    </ol>
+  </section>
+
+  <!-- 8 ── COLECCIÓN -->
+  <section class="collection" id="coleccion">
+    <h2 class="section-title reveal">La colección</h2>
+    <div class="editions">
+      <article class="edition reveal">
+        <h3>Naturale</h3>
+        <p class="edition__mat">Vachetta sin pigmento</p>
+        <p class="edition__note">Envejece con quien la lleva. Al año no se parece a ninguna otra.</p>
+        <p class="edition__price">Precio bajo solicitud</p>
+      </article>
+      <article class="edition reveal">
+        <h3>Notte</h3>
+        <p class="edition__mat">Pátina negra, siete capas</p>
+        <p class="edition__note">El negro se construye por transparencia; a contraluz aparece el marrón del fondo.</p>
+        <p class="edition__price">Precio bajo solicitud</p>
+      </article>
+      <article class="edition reveal">
+        <h3>Brunito</h3>
+        <p class="edition__mat">Pátina coñac, cantos a mano</p>
+        <p class="edition__note">Quemada a mano en punta y talón. Es la que más se pide y la que menos se repite.</p>
+        <p class="edition__price">Precio bajo solicitud</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 9 ── EDICIÓN LIMITADA + CITA -->
+  <section class="request" id="cita">
+    <div class="request__num reveal">
+      <span class="request__n">001</span><span class="request__d">/120</span>
+    </div>
+    <div class="request__body">
+      <h2 class="section-title reveal">Solicitar un par</h2>
+      <p class="lede reveal">
+        Cada par se asigna en una cita privada en el taller de Florencia.
+        Déjanos tu nombre y te escribimos con las fechas disponibles.
+      </p>
+      <form class="form reveal" id="requestForm" novalidate>
+        <div class="field">
+          <label for="name">Nombre</label>
+          <input id="name" name="name" type="text" autocomplete="name" required />
+          <p class="field__error" data-for="name"></p>
+        </div>
+        <div class="field">
+          <label for="email">Correo electrónico</label>
+          <input id="email" name="email" type="email" autocomplete="email" required />
+          <p class="field__error" data-for="email"></p>
+        </div>
+        <button class="btn" type="submit">Solicitar cita privada</button>
+        <p class="form__done" id="formDone" hidden>
+          Gracias. Te escribimos en menos de dos días laborables.
+        </p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p class="footer__brand">Corvane</p>
+  <p>Via dei Serragli 42 · Florencia</p>
+  <p class="footer__legal">Maison ficticia creada como demostración. Ninguna de las piezas está a la venta.</p>
+</footer>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

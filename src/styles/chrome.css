@@ -1,0 +1,101 @@
+/* ── LA ESPINA ────────────────────────────────────────────────
+   Una única línea vertical que recorre toda la página sin cortarse.
+   El Monolite se corta de una sola pieza; la página también tiene
+   una sola costura, y no se rompe en ningún momento.
+   El segmento champán marca cuánto llevas leído.               */
+.spine {
+  position: fixed;
+  left: var(--spine-x);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  z-index: 40;
+  pointer-events: none;
+}
+.spine__track {
+  position: absolute;
+  inset: 0;
+  background: var(--rule);
+}
+.spine__fill {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 0%;
+  background: var(--champagne);
+  transform-origin: top;
+}
+.spine__label {
+  position: absolute;
+  left: 0.85rem;
+  bottom: 2.25rem;
+  transform-origin: left bottom;
+  rotate: -90deg;
+  translate: 0 0;
+  font-size: 0.625rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ash);
+  white-space: nowrap;
+  transition: opacity 0.4s var(--ease);
+}
+@media (max-width: 700px) { .spine { display: none; } }
+
+/* ── Barra superior ─────────────────────────────────────────── */
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.4rem var(--gutter);
+  padding-left: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
+  mix-blend-mode: normal;
+  background: linear-gradient(to bottom, var(--ink) 30%, transparent);
+}
+.wordmark {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.topnav { display: flex; align-items: center; gap: clamp(1rem, 2.4vw, 2.25rem); }
+.topnav a {
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+  transition: color 0.35s var(--ease);
+}
+.topnav a:hover { color: var(--bone); }
+.topnav__cta {
+  color: var(--champagne) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--champagne) 45%, transparent);
+  padding-bottom: 2px;
+}
+@media (max-width: 700px) {
+  .topnav a:not(.topnav__cta) { display: none; }
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--rule);
+  padding-block: 3.5rem 4rem;
+  display: grid;
+  gap: 0.4rem;
+  color: var(--ash);
+  font-size: 0.8125rem;
+}
+.footer__brand {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone);
+  margin-bottom: 0.4rem;
+}
+/* Sin opacity: rebajaba el contraste sobre el fondo a ~2.7:1 y no pasa AA. */
+.footer__legal { margin-top: 1.25rem; font-size: 0.75rem; max-width: 40ch; }

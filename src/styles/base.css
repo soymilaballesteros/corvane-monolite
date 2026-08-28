@@ -1,0 +1,78 @@
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+/* Sin `scroll-behavior: smooth`: el scroll suave del navegador compite con el
+   scrub de ScrollTrigger y las secuencias van a tirones. El suavizado de los
+   enlaces internos se hace en nav.ts, que sí respeta reduce-motion. */
+html {
+  color-scheme: dark;
+  background: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img, canvas { display: block; max-width: 100%; }
+img { height: auto; }
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 1px solid var(--champagne);
+  outline-offset: 4px;
+}
+
+/* ── Tipografía compartida ───────────────────────────────────── */
+.eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--champagne);
+  font-weight: 500;
+}
+
+.section-title {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(2.1rem, 5.2vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+
+.lede {
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--bone) 76%, transparent);
+  max-width: 46ch;
+}
+
+/* ── Contenedor ─────────────────────────────────────────────── */
+.hero, .manifesto, .atelier, .spec, .heritage, .collection, .request, .footer {
+  padding-inline: var(--gutter);
+  padding-left: max(var(--gutter), calc(var(--spine-x) + 4.5rem));
+}
+.manifesto, .atelier, .spec, .heritage, .collection, .request {
+  padding-block: var(--pad-section);
+  max-width: calc(var(--content-max) + 8rem);
+}
+
+/* ── Aparición al entrar en viewport ────────────────────────── */
+[data-js] .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+[data-js] .reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-js] .reveal { opacity: 1; transform: none; transition: none; }
+}

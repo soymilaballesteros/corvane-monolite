@@ -1,0 +1,16 @@
+node_modules
+dist
+.DS_Store
+*.log
+
+# Vídeos e imágenes en bruto de la IA: pesados y regenerables.
+# Los frames derivados (public/frames) SÍ se versionan: Vercel los necesita.
+assets/source/*.mp4
+assets/source/*.mov
+assets/source/*.png
+assets/source/*.jpg
+.tmp-frames/
+
+# Restos de verificación en navegador
+.playwright-mcp/
+/0*.png
